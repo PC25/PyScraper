@@ -1,0 +1,123 @@
+import mysql.connector
+import urllib.request
+import unittest
+mydb = mysql.connector.connect(
+ host="192.168.121.187",
+ user="first_year",
+ passwd="first_year",
+ database="first_year_db"
+)
+mycursor = mydb.cursor()
+
+
+
+def decorator(func):
+   def inner1(arg1):
+       temp=arg1
+       count=0
+       final_sr="('"+temp+"',)"
+       mycursor.execute("SELECT * FROM user")
+       for x in mycursor :
+           name_str=str(x)
+           if name_str==final_sr:
+               count=1
+       if count==0:
+         #raise Exception('Error')
+         return False
+       else:
+         func(arg1)
+
+
+   return inner1
+
+@decorator
+def function(username):
+  print(username + " exists")
+
+#function('pushpam')
+
+function('k4ni5h')
+
+class Person:
+     def __init__(self, name, work=[], city="Roorkee"):
+       self.name = name
+       self.city =  city
+       if len(work)!=0:
+        self.work = work
+     def show(self):
+         print("My name is {} and my current city is {}.".format(self.name,self.city))
+p1 = Person("PC", ["Plumber"])
+p1.show()
+
+q = list()
+def scrap(username):
+   wiki = "https://en-gb.facebook.com/{}".format(username)
+   if username not in q:
+     favli=list()
+     favc = list()
+     new_dict = dict()
+     page = urllib.request.urlopen(wiki)
+     from bs4 import BeautifulSoup
+     soup = BeautifulSoup(page, features="html.parser")
+     for a in soup.find_all('a', class_="_2nlw _2nlv"): #Name
+       n = a.contents[0]
+       print(n)
+     for span in soup.find_all('span', class_="_2iel _50f7"): #Current City
+       cc = span.find('a').contents[0]
+       print(cc)
+     for div in soup.find_all('div', class_="_2lzr _50f5 _50f7"): #Work
+       work = div.find('a').contents[0]
+       print(work)
+     for a in soup.find_all('a', class_="mediaRowItem"):  #Favorite Values
+        favli.append(a.contents[0].string)
+     for div in soup('div', class_="labelContainer"):   #Favorite categories
+       favc.append(div.string)
+     size = len(favli)
+     for x in range(size):  #Create dictionary
+        new_dict["{}".format(favc[x])] = favli[x]
+     if(size!=0):
+       print(new_dict)
+     else:
+       print("No favourites found")
+     if len(cc)!=0 and len(work)!=0:
+       obj = Person(n, work, cc)
+     q.append(obj)
+   else:
+    for x in q:
+      if x.name == username:
+        x.show()
+
+
+
+scrap("pushpam.choudhary75")
+# scrap("shaddygarg")
+# scrap("swapnil.negi09")
+
+class SimpleTest(unittest.TestCase):
+  global pc
+  pc = Person("Pushpam", ["Pilot"])
+  def test(self):
+    self.assertTrue(True)
+  def test_name(self):
+    self.assertTrue(pc.name)
+  def test_name_e(self):
+    self.assertEqual('Pushpam', pc.name)
+  
+  def test_work(self):
+    self.assertTrue(pc.work)
+  def test_work_e(self):
+    self.assertEqual(["Pilot"], pc.work)
+  def test_city(self):
+    self.assertTrue(pc.city)
+  def test_city_e(self):
+    self.assertEqual("Roorkee", pc.city)
+  def test_work(self):
+    with self.assertRaises(Exception):
+        empty(pc.work)
+  def scrap_test(self):
+    self.assertTrue(scrap("pushpam.choudhary75"))
+  def test_list(self):
+    self.assertTrue(q)
+
+if __name__ == '__main__':
+    unittest.main()
